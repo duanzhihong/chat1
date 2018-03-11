@@ -1,0 +1,13 @@
+2018-03-10 18:39:02 exception 'Exception' with message 'You can't send(array) to client, you need to convert it to a string. ' in D:\study\workerman\Workerman\Protocols\Websocket.php:225
+Stack trace:
+#0 D:\study\workerman\Workerman\Connection\TcpConnection.php(313): Workerman\Protocols\Websocket::encode(Array, Object(Workerman\Connection\TcpConnection))
+#1 D:\study\workerman\work.php(27): Workerman\Connection\TcpConnection->send(Array)
+#2 [internal function]: {closure}(Object(Workerman\Connection\TcpConnection), 'get id')
+#3 D:\study\workerman\Workerman\Connection\TcpConnection.php(632): call_user_func(Object(Closure), Object(Workerman\Connection\TcpConnection), 'get id')
+#4 [internal function]: Workerman\Connection\TcpConnection->baseRead(Resource id #16)
+#5 D:\study\workerman\Workerman\Events\Select.php(286): call_user_func_array(Array, Array)
+#6 D:\study\workerman\Workerman\Worker.php(856): Workerman\Events\Select->loop()
+#7 D:\study\workerman\Workerman\Worker.php(473): Workerman\Worker->run()
+#8 D:\study\workerman\Workerman\Worker.php(382): Workerman\Worker::runAllWorkers()
+#9 D:\study\workerman\work.php(64): Workerman\Worker::runAll()
+#10 {main}
