@@ -13,7 +13,14 @@ $ws_worker=new worker('websocket://0.0.0.0:2000');
 $ws_worker->count=1;
 //设置一个属性，用来存放uid存放到connection中
 $ws_worker->uidConnection=[];
-//当客户端收到消息的数据的时候给指定的用户返回
+//设置心跳间隔
+define('HEARTBEAT_TIME',120);
+/**
+ * @param $connection
+ * @param $data
+ * @return mixed
+ * 当客户端发送消息的的时候进行处理
+ */
 $ws_worker->onMessage=function($connection,$data)
 {
     global $ws_worker;
@@ -38,7 +45,11 @@ $ws_worker->onMessage=function($connection,$data)
         sendMessageToId($sendId,$message,$getId);
     }
 };
-//向所有的用户进行推送
+/**
+ * @param $sendId
+ * @param $message
+ * 向所有的用户进行推送
+ */
 function sendAll($sendId,$message)
 {
     global $ws_worker;
@@ -55,7 +66,13 @@ function sendAll($sendId,$message)
         }
     }
 }
-//向指定用户进行消息的发送
+
+/**
+ * @param $sendId
+ * @param $message
+ * @param $getId
+ * 给指定的用户发送消息
+ */
 function sendMessageToId($sendId,$message,$getId)
 {
     global $ws_worker;
@@ -67,5 +84,50 @@ function sendMessageToId($sendId,$message,$getId)
         $connection->send(json_encode($arr));
     }
 }
+
+/**
+ * @param $connection
+ * 当用户断开连接的时候推送广播
+ */
+$ws_worker->onClose=function ($connection)
+{
+    //获取这个用户的id
+    if(isset($connection->uid)&&!empty($connection->uid))
+    {
+        $uid=$connection->uid;
+        //进行消息的群发
+        global $ws_worker;
+        $arr=[];
+        $arr['type']='close';
+        $arr['xiaoxi']=$uid.'下线';
+        foreach($ws_worker->uidConnection as $connection)
+        {
+            $connection->send(json_encode($arr));
+        }
+    }
+};
+
+$ws_worker->onWorkerStart=function($ws_worker)
+{
+   //设置定时器，检测用户是否在线
+    \Workerman\Lib\Timer::add(1,function()use($ws_worker){
+        $time_now=time();
+        global $ws_worker;
+        foreach($ws_worker->uidConnection as $connection)
+        {
+           //如果用户没有接受过消息
+            if(empty($connection->lastMessageTime))
+            {
+              $connection->lastMessageTime=$time_now;
+              continue;
+            }
+           if($time_now-$connection->lastMessageTime>HEARTBEAT_TIME)
+           {
+             $connection->close();
+           }
+        }
+    });
+};
 //运行worker
 Worker::runAll();
+

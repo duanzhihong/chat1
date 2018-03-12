@@ -42,10 +42,13 @@ $(function(){
         {
            //向指定的客户端发送消息
             alert('用户'+json_obj.sendId+":"+json_obj.xiaoxi);
-        }else if(json_obj.tyep='allMes')
+        }else if(json_obj.type=='allMes')
         {
           //群发
             alert('用户'+json_obj.sendId+":"+json_obj.xiaoxi);
+        }else if(json_obj.type=='close')
+        {
+            alert(json_obj.xiaoxi);
         }
     };
 })
